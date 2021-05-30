@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Body, Depends
 
 from app.model import PostSchema, UserSchema, UserLoginSchema
+from app.classes import User
 from app.auth.auth_bearer import JWTBearer
 from app.auth.auth_handler import signJWT
 
@@ -13,7 +14,10 @@ posts = [
     }
 ]
 
-users = []
+users = [
+    User(fullname="admin", email="admin@mmm.cat", password="admin"),
+    User(fullname="mmm", email="mmm@mmm.cat", password="mmm")
+]
 
 app = FastAPI()
 
@@ -41,6 +45,10 @@ async def get_single_post(id: int) -> dict:
                 "data": post
             }
 
+
+@app.get("/users", dependencies=[Depends(JWTBearer())], tags=["users"])
+async def get_users() -> dict:
+    return { "data": users }
 
 @app.post("/user/signup", tags=["user"])
 async def create_user(user: UserSchema = Body(...)):
